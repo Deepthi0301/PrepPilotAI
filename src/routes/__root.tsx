@@ -79,6 +79,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "PrepPilot AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "PrepPilot AI — Practice. Improve. Get Interview Ready." },
+      { name: "twitter:title", content: "PrepPilot AI — Practice. Improve. Get Interview Ready." },
+      { property: "og:description", content: "AI-powered mock interview and communication coach for students." },
+      { name: "twitter:description", content: "AI-powered mock interview and communication coach for students." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7848cf52-a8a0-4054-a27a-26ef67c38324/id-preview-3a83ca0c--dc27db26-d237-4be5-b1ff-3faddc7503b1.lovable.app-1779775906037.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7848cf52-a8a0-4054-a27a-26ef67c38324/id-preview-3a83ca0c--dc27db26-d237-4be5-b1ff-3faddc7503b1.lovable.app-1779775906037.png" },
     ],
     links: [
       {
