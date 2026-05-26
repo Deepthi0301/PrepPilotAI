@@ -9,38 +9,141 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedMockInterviewRouteImport } from './routes/_authenticated/mock-interview'
+import { Route as AuthenticatedGroupDiscussionRouteImport } from './routes/_authenticated/group-discussion'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDailyChallengeRouteImport } from './routes/_authenticated/daily-challenge'
+import { Route as AuthenticatedCommunicationRouteImport } from './routes/_authenticated/communication'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMockInterviewRoute =
+  AuthenticatedMockInterviewRouteImport.update({
+    id: '/mock-interview',
+    path: '/mock-interview',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGroupDiscussionRoute =
+  AuthenticatedGroupDiscussionRouteImport.update({
+    id: '/group-discussion',
+    path: '/group-discussion',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDailyChallengeRoute =
+  AuthenticatedDailyChallengeRouteImport.update({
+    id: '/daily-challenge',
+    path: '/daily-challenge',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCommunicationRoute =
+  AuthenticatedCommunicationRouteImport.update({
+    id: '/communication',
+    path: '/communication',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/communication': typeof AuthenticatedCommunicationRoute
+  '/daily-challenge': typeof AuthenticatedDailyChallengeRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/group-discussion': typeof AuthenticatedGroupDiscussionRoute
+  '/mock-interview': typeof AuthenticatedMockInterviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/communication': typeof AuthenticatedCommunicationRoute
+  '/daily-challenge': typeof AuthenticatedDailyChallengeRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/group-discussion': typeof AuthenticatedGroupDiscussionRoute
+  '/mock-interview': typeof AuthenticatedMockInterviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/communication': typeof AuthenticatedCommunicationRoute
+  '/_authenticated/daily-challenge': typeof AuthenticatedDailyChallengeRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/group-discussion': typeof AuthenticatedGroupDiscussionRoute
+  '/_authenticated/mock-interview': typeof AuthenticatedMockInterviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/communication'
+    | '/daily-challenge'
+    | '/dashboard'
+    | '/group-discussion'
+    | '/mock-interview'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/communication'
+    | '/daily-challenge'
+    | '/dashboard'
+    | '/group-discussion'
+    | '/mock-interview'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/communication'
+    | '/_authenticated/daily-challenge'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/group-discussion'
+    | '/_authenticated/mock-interview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +151,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/mock-interview': {
+      id: '/_authenticated/mock-interview'
+      path: '/mock-interview'
+      fullPath: '/mock-interview'
+      preLoaderRoute: typeof AuthenticatedMockInterviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/group-discussion': {
+      id: '/_authenticated/group-discussion'
+      path: '/group-discussion'
+      fullPath: '/group-discussion'
+      preLoaderRoute: typeof AuthenticatedGroupDiscussionRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/daily-challenge': {
+      id: '/_authenticated/daily-challenge'
+      path: '/daily-challenge'
+      fullPath: '/daily-challenge'
+      preLoaderRoute: typeof AuthenticatedDailyChallengeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/communication': {
+      id: '/_authenticated/communication'
+      path: '/communication'
+      fullPath: '/communication'
+      preLoaderRoute: typeof AuthenticatedCommunicationRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedCommunicationRoute: typeof AuthenticatedCommunicationRoute
+  AuthenticatedDailyChallengeRoute: typeof AuthenticatedDailyChallengeRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGroupDiscussionRoute: typeof AuthenticatedGroupDiscussionRoute
+  AuthenticatedMockInterviewRoute: typeof AuthenticatedMockInterviewRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCommunicationRoute: AuthenticatedCommunicationRoute,
+  AuthenticatedDailyChallengeRoute: AuthenticatedDailyChallengeRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGroupDiscussionRoute: AuthenticatedGroupDiscussionRoute,
+  AuthenticatedMockInterviewRoute: AuthenticatedMockInterviewRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
