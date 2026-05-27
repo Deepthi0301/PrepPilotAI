@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { generateInterviewQuestion, evaluateAnswer } from "@/lib/ai.functions";
+import { VoiceInput } from "@/components/voice-input";
 
 export const Route = createFileRoute("/_authenticated/mock-interview")({
   component: MockInterview,
@@ -98,10 +99,11 @@ function MockInterview() {
           <Textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Type your answer here…"
+            placeholder="Type or speak your answer…"
             className="min-h-32 resize-none bg-background/40"
           />
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <VoiceInput value={answer} onChange={setAnswer} label="Speak answer" />
             <Button
               onClick={submit}
               disabled={!answer.trim() || loading !== null}
@@ -115,14 +117,32 @@ function MockInterview() {
 
       {feedback && (
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <ScoreCard label="Professionalism" value={feedback.professionalism} />
             <ScoreCard label="Confidence" value={feedback.confidence} />
+            <ScoreCard label="Clarity" value={feedback.clarity} />
+            <ScoreCard label="Grammar" value={feedback.grammarScore} />
           </div>
           <div className="glass rounded-2xl p-6">
             <h3 className="font-semibold">Communication feedback</h3>
             <p className="mt-2 text-sm text-muted-foreground">{feedback.communication}</p>
           </div>
+          {feedback.grammarMistakes.length > 0 && (
+            <div className="glass rounded-2xl p-6">
+              <h3 className="font-semibold text-chart-4">Grammar mistakes</h3>
+              <ul className="mt-3 space-y-2 text-sm">
+                {feedback.grammarMistakes.map((g, i) => <li key={i}>• {g}</li>)}
+              </ul>
+            </div>
+          )}
+          {feedback.improvementSuggestions.length > 0 && (
+            <div className="glass rounded-2xl p-6">
+              <h3 className="font-semibold text-primary">Improvement suggestions</h3>
+              <ul className="mt-3 space-y-2 text-sm">
+                {feedback.improvementSuggestions.map((s, i) => <li key={i}>💡 {s}</li>)}
+              </ul>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="glass rounded-2xl p-6">
               <h3 className="font-semibold text-chart-3">Strengths</h3>
