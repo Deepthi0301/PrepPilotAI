@@ -69,7 +69,7 @@ export const generateInterviewQuestion = createServerFn({ method: "POST" })
 export const evaluateAnswer = createServerFn({ method: "POST" })
   .inputValidator((d: { type: InterviewType; question: string; answer: string }) => d)
   .handler(async ({ data }) => {
-    const sys = `You are a kind but honest interview coach for college students. Give beginner-friendly feedback for a ${data.type} interview answer. Return JSON only.`;
+    const sys = `You are a kind but honest interview coach for college students. Give beginner-friendly feedback for a ${data.type} interview answer. Score 0-100. Return JSON only.`;
     const user = `Question: ${data.question}\n\nStudent Answer: ${data.answer}`;
     const json = await callGateway({
       messages: [
@@ -86,12 +86,16 @@ export const evaluateAnswer = createServerFn({ method: "POST" })
               properties: {
                 professionalism: { type: "number", description: "0-100" },
                 confidence: { type: "number", description: "0-100" },
+                clarity: { type: "number", description: "0-100, speaking clarity" },
+                grammarScore: { type: "number", description: "0-100, grammar quality" },
+                grammarMistakes: { type: "array", items: { type: "string" }, description: "Specific grammar mistakes spotted (empty if none)" },
+                improvementSuggestions: { type: "array", items: { type: "string" }, description: "2-3 concrete improvement tips" },
                 communication: { type: "string", description: "1-2 sentence feedback on communication" },
                 strengths: { type: "array", items: { type: "string" }, description: "2-3 strengths" },
                 weaknesses: { type: "array", items: { type: "string" }, description: "2-3 areas to improve" },
                 betterAnswer: { type: "string", description: "A polished, professional version of the answer" },
               },
-              required: ["professionalism", "confidence", "communication", "strengths", "weaknesses", "betterAnswer"],
+              required: ["professionalism", "confidence", "clarity", "grammarScore", "grammarMistakes", "improvementSuggestions", "communication", "strengths", "weaknesses", "betterAnswer"],
               additionalProperties: false,
             },
           },
@@ -102,6 +106,10 @@ export const evaluateAnswer = createServerFn({ method: "POST" })
     return extractToolArgs(json) as {
       professionalism: number;
       confidence: number;
+      clarity: number;
+      grammarScore: number;
+      grammarMistakes: string[];
+      improvementSuggestions: string[];
       communication: string;
       strengths: string[];
       weaknesses: string[];
@@ -143,6 +151,60 @@ export const improveCommunication = createServerFn({ method: "POST" })
       tool_choice: { type: "function", function: { name: "improve" } },
     });
     return extractToolArgs(json) as { improved: string; explanation: string };
+  });
+
+/* ---------------- Speaking / Communication Feedback ---------------- */
+
+export const analyzeSpeaking = createServerFn({ method: "POST" })
+  .inputValidator((d: { transcript: string; context?: string }) =>
+    z.object({ transcript: z.string().min(1).max(4000), context: z.string().max(500).optional() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const json = await callGateway({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a speaking & communication coach. Analyze a student's spoken transcript. Score each metric 0-100. Be kind, specific, beginner-friendly. Return JSON only.",
+        },
+        {
+          role: "user",
+          content: `${data.context ? `Context: ${data.context}\n\n` : ""}Transcript:\n${data.transcript}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "analyze",
+            parameters: {
+              type: "object",
+              properties: {
+                clarity: { type: "number", description: "0-100 speaking clarity" },
+                confidence: { type: "number", description: "0-100 confidence" },
+                grammarScore: { type: "number", description: "0-100 grammar" },
+                fluency: { type: "number", description: "0-100 fluency / flow" },
+                grammarMistakes: { type: "array", items: { type: "string" } },
+                improvementSuggestions: { type: "array", items: { type: "string" }, description: "3 concrete tips" },
+                summary: { type: "string", description: "1-2 sentence overall feedback" },
+              },
+              required: ["clarity", "confidence", "grammarScore", "fluency", "grammarMistakes", "improvementSuggestions", "summary"],
+              additionalProperties: false,
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "analyze" } },
+    });
+    return extractToolArgs(json) as {
+      clarity: number;
+      confidence: number;
+      grammarScore: number;
+      fluency: number;
+      grammarMistakes: string[];
+      improvementSuggestions: string[];
+      summary: string;
+    };
   });
 
 /* ---------------- Daily Speaking Topic ---------------- */
