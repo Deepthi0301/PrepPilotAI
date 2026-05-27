@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Mic, MessageSquare, Brain, Users, Sparkles, LogOut } from "lucide-react";
+import { LayoutDashboard, Mic, MessageSquare, Brain, Users, Sparkles, LogOut, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +22,7 @@ const items = [
   { title: "Communication", url: "/communication", icon: MessageSquare },
   { title: "Daily Challenge", url: "/daily-challenge", icon: Brain },
   { title: "Group Discussion", url: "/group-discussion", icon: Users },
+  { title: "Profile", url: "/profile", icon: User },
 ] as const;
 
 export function AppSidebar() {
