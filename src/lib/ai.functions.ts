@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MODEL = "google/gemini-3-flash-preview";
 
@@ -37,7 +38,16 @@ const interviewTypes = ["hr", "technical", "behavioral"] as const;
 type InterviewType = (typeof interviewTypes)[number];
 
 export const generateInterviewQuestion = createServerFn({ method: "POST" })
-  .inputValidator((d: { type: InterviewType; previousQuestions: string[]; role?: string }) => d)
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        type: z.enum(interviewTypes),
+        previousQuestions: z.array(z.string().max(500)).max(20),
+        role: z.string().max(100).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const sys = `You are an expert ${data.type.toUpperCase()} interviewer for a student preparing for internships and placements${data.role ? ` for the role of ${data.role}` : ""}. Generate ONE realistic, beginner-friendly interview question. Avoid repeating any of the previous questions. Return JSON only.`;
     const user = `Previous questions:\n${data.previousQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n") || "(none yet)"}\n\nGive the next question.`;
@@ -67,7 +77,16 @@ export const generateInterviewQuestion = createServerFn({ method: "POST" })
   });
 
 export const evaluateAnswer = createServerFn({ method: "POST" })
-  .inputValidator((d: { type: InterviewType; question: string; answer: string }) => d)
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        type: z.enum(interviewTypes),
+        question: z.string().min(1).max(2000),
+        answer: z.string().min(1).max(4000),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const sys = `You are a kind but honest interview coach for college students. Give beginner-friendly feedback for a ${data.type} interview answer. Score 0-100. Return JSON only.`;
     const user = `Question: ${data.question}\n\nStudent Answer: ${data.answer}`;
@@ -120,6 +139,7 @@ export const evaluateAnswer = createServerFn({ method: "POST" })
 /* ---------------- Communication Improver ---------------- */
 
 export const improveCommunication = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { text: string }) => z.object({ text: z.string().min(1).max(2000) }).parse(d))
   .handler(async ({ data }) => {
     const json = await callGateway({
@@ -156,6 +176,7 @@ export const improveCommunication = createServerFn({ method: "POST" })
 /* ---------------- Speaking / Communication Feedback ---------------- */
 
 export const analyzeSpeaking = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { transcript: string; context?: string }) =>
     z.object({ transcript: z.string().min(1).max(4000), context: z.string().max(500).optional() }).parse(d),
   )
@@ -210,7 +231,8 @@ export const analyzeSpeaking = createServerFn({ method: "POST" })
 /* ---------------- Daily Speaking Topic ---------------- */
 
 export const generateSpeakingTopic = createServerFn({ method: "POST" })
-  .inputValidator((d: { seed?: string }) => d ?? {})
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ seed: z.string().max(100).optional() }).parse(d ?? {}))
   .handler(async () => {
     const json = await callGateway({
       messages: [
@@ -247,7 +269,8 @@ export const generateSpeakingTopic = createServerFn({ method: "POST" })
 /* ---------------- Group Discussion ---------------- */
 
 export const generateGDPack = createServerFn({ method: "POST" })
-  .inputValidator((d: { topic?: string }) => d ?? {})
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ topic: z.string().max(300).optional() }).parse(d ?? {}))
   .handler(async ({ data }) => {
     const userMsg = data.topic
       ? `Topic: ${data.topic}`
