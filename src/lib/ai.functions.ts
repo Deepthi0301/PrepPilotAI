@@ -21,7 +21,8 @@ async function callGateway(body: Record<string, unknown>) {
     if (res.status === 429) throw new Error("Rate limit reached. Please wait a moment and try again.");
     if (res.status === 402) throw new Error("AI credits exhausted. Please add credits in Settings → Workspace → Usage.");
     const txt = await res.text().catch(() => "");
-    throw new Error(`AI gateway error (${res.status}): ${txt.slice(0, 200)}`);
+    console.error(`[AI gateway] error ${res.status}:`, txt);
+    throw new Error("AI service error. Please try again later.");
   }
   return res.json();
 }
